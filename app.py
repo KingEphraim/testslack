@@ -56,24 +56,7 @@ def update_home_tab(client, event, logger):
     except Exception as e:
         logger.error(f"Error publishing home tab: {e}")
 
-
-@app.message("knock knock")
-def ask_who(message, say):
-    say("_Who's there?_")
-
-
-@app.event("app_mention")
-def handle_app_mention_events(body):
-    print(body)
-
-
-@app.event("message")
-def handle_message_events(body, logger):
-    logger.info(body)
-    print(body)
-
-
-@app.shortcut("open_modal")
+@app.shortcut("linkwebhook")
 def open_modal(ack, shortcut, client):
     # Acknowledge the shortcut request
     ack()
@@ -84,6 +67,8 @@ def open_modal(ack, shortcut, client):
         view={
             "type":
             "modal",
+            "callback_id":
+            "test2",
             "submit": {
                 "type": "plain_text",
                 "text": "Submit",
@@ -125,7 +110,7 @@ def open_modal(ack, shortcut, client):
 
 
 # Handle a view_submission request
-@app.view("")
+@app.view("test2")
 def handle_submission(ack, body, client, view, logger):
     # Assume there's an input block with `input_c` as the block_id and `dreamy_input`    
     hopes_and_dreams = view["state"]["values"]["refmid"]["number_input-action"]["value"]
@@ -158,6 +143,10 @@ def handle_submission(ack, body, client, view, logger):
     except e:
         logger.exception(f"Failed to post a message {e}")
 
+@app.action("sGF")
+def handle_some_action(ack, body, logger):
+    ack()
+    logger.info(body)
 
 # Start your app
 if __name__ == "__main__":
