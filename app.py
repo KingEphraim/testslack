@@ -121,12 +121,13 @@ def open_modal(ack, shortcut, client):
 def handle_submission(ack, body, client, view, logger):
     user = body["user"]["id"]
     username = body["user"]["username"]
-    midref = view["state"]["values"]["refmid"]["number_input-action"]["value"]    
-    notf=body
+    midref = view["state"]["values"]["refmid"]["number_input-action"]["value"]  
+    
     if midref is not None:    
         try:
             send_plain_email(midref,username)   
         except :
+            client.chat_postMessage(channel="U8TL3HS3W", text="Failed to send email")
             logger.exception(f"Failed to send email")
 
         
@@ -149,7 +150,7 @@ def handle_submission(ack, body, client, view, logger):
     except Exception as e:
         # Handle error
         msg = "There was an error with your submission"
-        client.chat_postMessage(channel="U8TL3HS3W", text=msg)
+        client.chat_postMessage(channel=user, text=msg)
 
     # Message the user
     try:
