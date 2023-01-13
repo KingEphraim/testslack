@@ -3,9 +3,11 @@ import boto3
 # Use the package we installed
 from slack_bolt import App
 
-# Initializes your app with your bot token and signing secret
-app = App(token=os.environ.get("SLACK_BOT_TOKEN"),
-          signing_secret=os.environ.get("SLACK_SIGNING_SECRET"))
+
+app = App(
+    token=os.environ.get("SLACK_BOT_TOKEN"),
+    signing_secret=os.environ.get("SLACK_SIGNING_SECRET")
+)
 session = boto3.Session(
     aws_access_key_id=os.environ.get("aws_access_key_id"),
     aws_secret_access_key=os.environ.get("aws_secret_access_key"),
@@ -119,13 +121,21 @@ def open_modal(ack, shortcut, client):
 def handle_submission(ack, body, client, view, logger):
     user = body["user"]["id"]
     username = body["user"]["username"]
-    midref = view["state"]["values"]["refmid"]["number_input-action"]["value"] 
-    print(midref) 
-    print(body) 
-    print(client) 
-    print(view) 
+    midref = view["state"]["values"]["refmid"]["number_input-action"]["value"]    
+    notf=body
     if midref is not None:    
-        send_plain_email(midref,username)          
+        try:
+            send_plain_email(midref,username)   
+        except :
+            logger.exception(f"Failed to send email")
+
+        
+    
+
+
+        
+    
+
     # Acknowledge the view_submission request and close the modal
     ack()
     # Do whatever you want with the input data - here we're saving it to a DB
@@ -135,10 +145,11 @@ def handle_submission(ack, body, client, view, logger):
     msg = ""
     try:
         # Save to DB
-        msg = f"A ticket was created withe the information you provided {midref}"
+        msg = f"A ticket was created with the information you provided {midref}"
     except Exception as e:
         # Handle error
         msg = "There was an error with your submission"
+        client.chat_postMessage(channel="U8TL3HS3W", text=msg)
 
     # Message the user
     try:
