@@ -1,10 +1,15 @@
 import os
+import boto3
 # Use the package we installed
 from slack_bolt import App
 
 # Initializes your app with your bot token and signing secret
 app = App(token=os.environ.get("SLACK_BOT_TOKEN"),
           signing_secret=os.environ.get("SLACK_SIGNING_SECRET"))
+session = boto3.Session(
+    aws_access_key_id=os.environ.get("aws_access_key_id"),
+    aws_secret_access_key=os.environ.get("aws_secret_access_key"),
+)
 
 
 # Add functionality here
@@ -109,20 +114,18 @@ def open_modal(ack, shortcut, client):
         })
 
 
-# Handle a view_submission request
+
 @app.view("test2")
 def handle_submission(ack, body, client, view, logger):
-    # Assume there's an input block with `input_c` as the block_id and `dreamy_input`    
-    hopes_and_dreams = view["state"]["values"]["refmid"]["number_input-action"]["value"]
-    print(hopes_and_dreams)
     user = body["user"]["id"]
-    # Validate the inputs
-    errors = {}
-    if hopes_and_dreams is not None and len(hopes_and_dreams) <= 0:
-        errors["input_c"] = "The value must be longer than 5 characters"
-    if len(errors) > 0:
-        ack(response_action="errors", errors=errors)
-        return
+    username = body["user"]["username"]
+    midref = view["state"]["values"]["refmid"]["number_input-action"]["value"] 
+    print(midref) 
+    print(body) 
+    print(client) 
+    print(view) 
+    if midref is not None:    
+        send_plain_email(midref,username)          
     # Acknowledge the view_submission request and close the modal
     ack()
     # Do whatever you want with the input data - here we're saving it to a DB
@@ -132,7 +135,7 @@ def handle_submission(ack, body, client, view, logger):
     msg = ""
     try:
         # Save to DB
-        msg = f"Your submission of {hopes_and_dreams} was successful"
+        msg = f"A ticket was created withe the information you provided {midref}"
     except Exception as e:
         # Handle error
         msg = "There was an error with your submission"
@@ -143,10 +146,34 @@ def handle_submission(ack, body, client, view, logger):
     except e:
         logger.exception(f"Failed to post a message {e}")
 
-@app.action("sGF")
-def handle_some_action(ack, body, logger):
-    ack()
-    logger.info(body)
+def send_plain_email(midref,username):
+    ses_client = boto3.client("ses", region_name="us-east-1")
+    CHARSET = "UTF-8"
+    midrefid=midref
+    username=username
+    response = ses_client.send_email(
+        Destination={
+            "ToAddresses": [
+                "elefkowitz@cardknox.com",
+            ],
+        },
+        Message={
+            "Body": {
+                "Text": {
+                    "Charset": CHARSET,
+                    "Data": f"Please enable cross tokenization: input 4755 in the Cardknox Settings of Cardknox MID/Refnum: {midrefid} and let #ck-partner-ezrirx know when done. This request originated from their Slack user {username}.",
+                }
+            },
+            "Subject": {
+                "Charset": CHARSET,
+                "Data": "Amazing Email Tutorial",
+            },
+        },
+        Source="ckintegrations@gmail.com",
+    )
+    print(response)
+
+
 
 # Start your app
 if __name__ == "__main__":
