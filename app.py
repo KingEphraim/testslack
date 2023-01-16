@@ -59,7 +59,7 @@ def update_home_tab(client, event, logger):
     except Exception as e:
         logger.error(f"Error publishing home tab: {e}")
 
-@app.shortcut("linkwebhook")
+@app.shortcut("linktokens")
 def open_modal(ack, shortcut, client):
     # Acknowledge the shortcut request
     ack()
