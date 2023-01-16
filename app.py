@@ -163,7 +163,7 @@ def send_plain_email(midref,username):
     response = ses_client.send_email(
         Destination={
             "ToAddresses": [
-                "gatewaysupport@cardknox.com",
+                "elefkowitz@cardknox.com",
             ],
         },
         Message={
