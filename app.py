@@ -8,11 +8,6 @@ app = App(
     token=os.environ.get("SLACK_BOT_TOKEN"),
     signing_secret=os.environ.get("SLACK_SIGNING_SECRET")
 )
-session = boto3.Session(
-    aws_access_key_id=os.environ.get("aws_access_key_id"),
-    aws_secret_access_key=os.environ.get("aws_secret_access_key"),
-)
-s3 = session.resource('s3')
 
 # Add functionality here
 # @app.event("app_home_opened") etc
