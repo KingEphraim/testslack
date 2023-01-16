@@ -3,11 +3,12 @@ import boto3
 # Use the package we installed
 from slack_bolt import App
 
-
 app = App(
     token=os.environ.get("SLACK_BOT_TOKEN"),
     signing_secret=os.environ.get("SLACK_SIGNING_SECRET")
 )
+
+
 
 # Add functionality here
 # @app.event("app_home_opened") etc
