@@ -8,10 +8,7 @@ app = App(
     token=os.environ.get("SLACK_BOT_TOKEN"),
     signing_secret=os.environ.get("SLACK_SIGNING_SECRET")
 )
-session = boto3.Session(
-    aws_access_key_id=os.environ.get("aws_access_key_id"),
-    aws_secret_access_key=os.environ.get("aws_secret_access_key"),
-)
+
 
 
 # Add functionality here
@@ -122,7 +119,7 @@ def handle_submission(ack, body, client, view, logger):
     user = body["user"]["id"]
     username = body["user"]["username"]
     midref = view["state"]["values"]["refmid"]["number_input-action"]["value"]  
-    logger.error("testcreds",os.environ.get("SLACK_BOT_TOKEN"),os.environ.get("SLACK_SIGNING_SECRET"),os.environ.get("aws_access_key_id"),os.environ.get("aws_secret_access_key"))
+   
     if midref is not None:    
         try:
             send_plain_email(midref,username)   
