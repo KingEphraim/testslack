@@ -59,9 +59,9 @@ def update_home_tab(client, event, logger):
     except Exception as e:
         logger.error(f"Error publishing home tab: {e}")
 
-@app.shortcut("linktokens")
+@app.shortcut("linktokensezrirx")
 def open_modal(ack, shortcut, client):
-    # Acknowledge the shortcut request
+    # Acknowledge the shortcut request    
     ack()
     # Call the views_open method using the built-in WebClient
     client.views_open(
@@ -118,6 +118,7 @@ def handle_submission(ack, body, client, view, logger):
     user = body["user"]["id"]
     username = body["user"]["username"]
     midref = view["state"]["values"]["refmid"]["number_input-action"]["value"]  
+    print(body)
     #logger.error("testcreds:",os.environ.get("SLACK_BOT_TOKEN"),os.environ.get("SLACK_SIGNING_SECRET"),os.environ.get("aws_access_key_id"),os.environ.get("aws_secret_access_key"))
     if midref is not None:    
         try:
@@ -162,19 +163,19 @@ def send_plain_email(midref,username):
     response = ses_client.send_email(
         Destination={
             "ToAddresses": [
-                "elefkowitz@cardknox.com",
+                "gatewaysupport@cardknox.com",
             ],
         },
         Message={
             "Body": {
                 "Text": {
                     "Charset": CHARSET,
-                    "Data": f"Please enable cross tokenization: input 4755 in the Cardknox Settings of Cardknox MID/Refnum: {midrefid} and let #ck-partner-ezrirx know when done. This request originated from their Slack user {username}.",
+                    "Data": f"Please enable cross tokenization: input 4755 in the Cardknox Settings of Cardknox MID/Refnum: {midrefid} and let #ck-partner-ezrirx know when done. This request originated from slack user {username}.",
                 }
             },
             "Subject": {
                 "Charset": CHARSET,
-                "Data": "Amazing Email Tutorial",
+                "Data": "Link tokens request",
             },
         },
         Source="ckintegrations@gmail.com",
