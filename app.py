@@ -1,9 +1,7 @@
 import os
-import boto3
 # Use the package we installed
 from slack_bolt import App
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
+
 
 app = App(
     token=os.environ.get("SLACK_BOT_TOKEN"),
