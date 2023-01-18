@@ -2,6 +2,8 @@ import os
 import boto3
 # Use the package we installed
 from slack_bolt import App
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 app = App(
     token=os.environ.get("SLACK_BOT_TOKEN"),
@@ -117,23 +119,17 @@ def open_modal(ack, shortcut, client):
 def handle_submission(ack, body, client, view, logger):
     user = body["user"]["id"]
     username = body["user"]["username"]
-    midref = view["state"]["values"]["refmid"]["number_input-action"]["value"]  
-    print(body)
+    midref = view["state"]["values"]["refmid"]["number_input-action"]["value"]      
     #logger.error("testcreds:",os.environ.get("SLACK_BOT_TOKEN"),os.environ.get("SLACK_SIGNING_SECRET"),os.environ.get("aws_access_key_id"),os.environ.get("aws_secret_access_key"))
     if midref is not None:    
         try:
-            send_plain_email(midref,username)   
-        except :
-            client.chat_postMessage(channel="U8TL3HS3W", text="Failed to send email")
-            logger.exception(f"Failed to send email")
+          response =  send_plain_email(midref,username)  
+          logger.error(response)         
+        except Exception as e:
+            #client.chat_postMessage(channel="U8TL3HS3W", text="Failed to send email")
+            logger.exception(f"Something went wrong {e}")
 
         
-    
-
-
-        
-    
-
     # Acknowledge the view_submission request and close the modal
     ack()
     # Do whatever you want with the input data - here we're saving it to a DB
@@ -153,33 +149,26 @@ def handle_submission(ack, body, client, view, logger):
     try:
         client.chat_postMessage(channel=user, text=msg)
     except e:
-        logger.exception(f"Failed to post a message {e}")
+        logger.exception(f"Failed to post a message {e}") 
 
-def send_plain_email(midref,username):
-    ses_client = boto3.client("ses", region_name="us-east-1")
-    CHARSET = "UTF-8"
+def send_plain_email(midref,username):    
     midrefid=midref
     username=username
-    response = ses_client.send_email(
-        Destination={
-            "ToAddresses": [
-                "elefkowitz@cardknox.com",
-            ],
-        },
-        Message={
-            "Body": {
-                "Text": {
-                    "Charset": CHARSET,
-                    "Data": f"Please enable cross tokenization: input 4755 in the Cardknox Settings of Cardknox MID/Refnum: {midrefid} and let #ck-partner-ezrirx know when done. This request originated from slack user {username}.",
-                }
-            },
-            "Subject": {
-                "Charset": CHARSET,
-                "Data": "Link tokens request",
-            },
-        },
-        Source="ckintegrations@gmail.com",
-    )    
+
+    message = Mail(
+    from_email='integrationgroup@cardknox.com',
+    to_emails='elefkowitz@cardknox.com',
+    subject='Link tokens',
+    html_content=f'Please enable cross tokenization: input 4755 in the Cardknox Settings of Cardknox MID/Refnum: {midrefid} and let #ck-partner-ezrirx know when done. This request originated from slack user {username}.')
+    try:
+        sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+        response = sg.send(message) 
+        return response       
+    except Exception as e:        
+        response = e
+        return response
+        
+     
 
 
 
